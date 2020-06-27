@@ -1,20 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace BinalyTest
 {
     public partial class Form1 : Form
     {
+        // radiobutton配列
+        private RadioButton[] modeRadioBtns = null;
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public Form1()
         {
             InitializeComponent();
+        }
+
+        /// <summary>
+        /// フォームロード時処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            modeRadioBtns = new RadioButton[2];
+            modeRadioBtns[0] = radioButton1;
+            modeRadioBtns[1] = radioButton2;
         }
 
         /// <summary>
@@ -25,7 +36,8 @@ namespace BinalyTest
         private void button1_Click(object sender, EventArgs e)
         {
             button1.Enabled = false;
-            textBox1.Text = FileIO.openFileSelect(textBox1.Text);
+            string selectedPath = textBox1.Text;
+            if (FileIO.openFileSelect(textBox1.Text, ref selectedPath)) textBox1.Text = selectedPath;
             button1.Enabled = true;
         }
 
@@ -37,7 +49,8 @@ namespace BinalyTest
         private void button2_Click(object sender, EventArgs e)
         {
             button2.Enabled = false;
-            textBox2.Text = FileIO.saveFileSelect(textBox1.Text);
+            string selectedPath = textBox2.Text;
+            if (FileIO.saveFileSelect(textBox2.Text, ref selectedPath)) textBox2.Text = selectedPath;
             button2.Enabled = true;
         }
 
@@ -49,6 +62,17 @@ namespace BinalyTest
         private void button3_Click(object sender, EventArgs e)
         {
             button3.Enabled = false;
+            // 選択されたradiobuttonのindexを取得
+            int index = -1;
+            for (int i = 0; i < modeRadioBtns.Length; i++)
+            {
+                if (modeRadioBtns[i].Checked)
+                {
+                    index = i;
+                    break;
+                }
+            }
+            FileIO.FileConvert(textBox1.Text, textBox2.Text, index);
             button3.Enabled = true;
         }
     }
