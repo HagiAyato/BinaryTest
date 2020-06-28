@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Windows.Forms;
 
 namespace BinalyTest
@@ -72,7 +73,142 @@ namespace BinalyTest
                 if (MessageBox.Show("既に同名ファイルがあります。置き換えますか？", "重複確認", MessageBoxButtons.OKCancel)
                     == DialogResult.Cancel) return false;
             }
+            switch (mode)
+            {
+                case 0:
+                    // テキスト⇒テキスト
+                    // テキスト読み込み
+                    // テキスト書き込み
+                    FileWriteStr(writeFilePath, FileReadStr(readFilePath));
+                    break;
+                case 1:
+                    // バイナリ⇒バイナリ
+                    FileWriteBin(writeFilePath, FileReadBin(readFilePath));
+                    break;
+                case 2:
+                    // バイナリ⇒テキスト
+
+                    break;
+                case 3:
+                    // テキスト⇒バイナリ
+
+                    break;
+            }
             return false;
+        }
+
+        /// <summary>
+        /// テキストファイル読み込み
+        /// </summary>
+        /// <param name="readFilePath">読み込むファイルのパス</param>
+        /// <returns>読み込んだデータ</returns>
+        private static string FileReadStr(string readFilePath)
+        {
+            string data = string.Empty;
+            try
+            {
+                if (File.Exists(readFilePath))
+                {
+                    using (FileStream fileStream = new FileStream(readFilePath, FileMode.Open))
+                    {
+                        using (StreamReader reader = new StreamReader(fileStream))
+                        {
+                            data = reader.ReadToEnd();
+                        }
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
+            return data;
+        }
+
+        /// <summary>
+        /// テキストファイル書き込み
+        /// </summary>
+        /// <param name="writeFilePath">書き込みむファイルのパス</param>
+        /// <param name="data">書き込むデータ</param>
+        /// <returns>true:処理成功 false:処理失敗</returns>
+        private static bool FileWriteStr(string writeFilePath, string data)
+        {
+            try
+            {
+                using (FileStream fileStream = new FileStream(writeFilePath, FileMode.Create))
+                {
+                    using (StreamWriter writer = new StreamWriter(fileStream))
+                    {
+                        writer.Write(data);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// バイナリファイル読み込み
+        /// </summary>
+        /// <param name="readFilePath">読み込むファイルのパス</param>
+        /// <returns>読み込んだデータ</returns>
+        private static byte[] FileReadBin(string readFilePath)
+        {
+            byte[] data = null;
+            try
+            {
+                if (File.Exists(readFilePath))
+                {
+                    using (FileStream fileStream = new FileStream(readFilePath, FileMode.Open))
+                    {
+                        using (BinaryReader reader = new BinaryReader(fileStream))
+                        {
+                            // 読み込み上限は2147483647Byte = 2.147483647GB
+                            int len = (int)fileStream.Length;
+                            data = new byte[len];
+                            reader.Read(data, 0, len);
+                        }
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
+            return data;
+        }
+
+        /// <summary>
+        /// バイナリファイル書き込み
+        /// </summary>
+        /// <param name="writeFilePath">書き込みむファイルのパス</param>
+        /// <param name="data">書き込むデータ</param>
+        /// <returns>true:処理成功 false:処理失敗</returns>
+        private static bool FileWriteBin(string writeFilePath, byte[] data)
+        {
+            try
+            {
+                using (FileStream fileStream = new FileStream(writeFilePath, FileMode.Create))
+                {
+                    using (BinaryWriter writer = new BinaryWriter(fileStream))
+                    {
+                        writer.Write(data);
+                    }
+                }
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+                return false;
+            }
+            return true;
         }
     }
 }

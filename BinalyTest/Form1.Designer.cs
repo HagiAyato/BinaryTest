@@ -39,6 +39,8 @@
             this.label4 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
+            this.radioButton3 = new System.Windows.Forms.RadioButton();
+            this.radioButton4 = new System.Windows.Forms.RadioButton();
             this.SuspendLayout();
             // 
             // label1
@@ -87,22 +89,22 @@
             // 
             this.radioButton1.AutoSize = true;
             this.radioButton1.Checked = true;
-            this.radioButton1.Location = new System.Drawing.Point(409, 136);
+            this.radioButton1.Location = new System.Drawing.Point(408, 106);
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(133, 19);
             this.radioButton1.TabIndex = 5;
             this.radioButton1.TabStop = true;
-            this.radioButton1.Text = "バイナリ⇒テキスト";
+            this.radioButton1.Text = "テキスト⇒テキスト";
             this.radioButton1.UseVisualStyleBackColor = true;
             // 
             // radioButton2
             // 
             this.radioButton2.AutoSize = true;
-            this.radioButton2.Location = new System.Drawing.Point(409, 162);
+            this.radioButton2.Location = new System.Drawing.Point(408, 132);
             this.radioButton2.Name = "radioButton2";
             this.radioButton2.Size = new System.Drawing.Size(133, 19);
             this.radioButton2.TabIndex = 6;
-            this.radioButton2.Text = "テキスト⇒バイナリ";
+            this.radioButton2.Text = "バイナリ⇒バイナリ";
             this.radioButton2.UseVisualStyleBackColor = true;
             // 
             // button1
@@ -145,11 +147,35 @@
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
+            // radioButton3
+            // 
+            this.radioButton3.AutoSize = true;
+            this.radioButton3.Location = new System.Drawing.Point(408, 158);
+            this.radioButton3.Name = "radioButton3";
+            this.radioButton3.Size = new System.Drawing.Size(133, 19);
+            this.radioButton3.TabIndex = 11;
+            this.radioButton3.TabStop = true;
+            this.radioButton3.Text = "バイナリ⇒テキスト";
+            this.radioButton3.UseVisualStyleBackColor = true;
+            // 
+            // radioButton4
+            // 
+            this.radioButton4.AutoSize = true;
+            this.radioButton4.Location = new System.Drawing.Point(408, 184);
+            this.radioButton4.Name = "radioButton4";
+            this.radioButton4.Size = new System.Drawing.Size(133, 19);
+            this.radioButton4.TabIndex = 12;
+            this.radioButton4.TabStop = true;
+            this.radioButton4.Text = "テキスト⇒バイナリ";
+            this.radioButton4.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.radioButton4);
+            this.Controls.Add(this.radioButton3);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.button1);
@@ -182,6 +208,8 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.RadioButton radioButton3;
+        private System.Windows.Forms.RadioButton radioButton4;
     }
 }
 
