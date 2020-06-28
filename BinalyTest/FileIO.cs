@@ -73,28 +73,56 @@ namespace BinalyTest
                 if (MessageBox.Show("既に同名ファイルがあります。置き換えますか？", "重複確認", MessageBoxButtons.OKCancel)
                     == DialogResult.Cancel) return false;
             }
-            switch (mode)
+            try
             {
-                case 0:
-                    // テキスト⇒テキスト
-                    // テキスト読み込み
-                    // テキスト書き込み
-                    FileWriteStr(writeFilePath, FileReadStr(readFilePath));
-                    break;
-                case 1:
-                    // バイナリ⇒バイナリ
-                    FileWriteBin(writeFilePath, FileReadBin(readFilePath));
-                    break;
-                case 2:
-                    // バイナリ⇒テキスト
-
-                    break;
-                case 3:
-                    // テキスト⇒バイナリ
-
-                    break;
+                switch (mode)
+                {
+                    case 0:
+                        // テキスト⇒テキスト
+                        FileWriteStr(writeFilePath, FileReadStr(readFilePath));
+                        break;
+                    case 1:
+                        // バイナリ⇒バイナリ
+                        FileWriteBin(writeFilePath, FileReadBin(readFilePath));
+                        break;
+                    case 2:
+                        // バイナリ⇒テキスト
+                        FileWriteStr(writeFilePath, BitConverter.ToString(FileReadBin(readFilePath)).Replace("-", string.Empty));
+                        break;
+                    case 3:
+                        // テキスト⇒バイナリ
+                        FileWriteBin(writeFilePath, HexStrToBin(FileReadStr(readFilePath)));
+                        break;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 16進数文字列(2×n桁)⇒バイナリ文字列変換
+        /// </summary>
+        /// <param name="hexStr">16進数文字列(2×n桁)</param>
+        /// <returns>バイナリ文字列</returns>
+        private static byte[] HexStrToBin(string hexStr)
+        {
+            // 引数nullなら例外発生
+            if (hexStr == null) throw new ArgumentNullException();
+            int len = hexStr.Length;
+            // 入力文字列長が偶数でないなら例外発生
+            if (len % 2 != 0) throw new FormatException();
+            // 長さ0なら戻り値は空
+            if (len == 0) return Array.Empty<byte>();
+            byte[] data = new byte[len / 2];
+            for (int i = 0; i < data.Length; i++)
+            {
+                data[i] = Convert.ToByte(hexStr.Substring(i * 2, 2), 16);
+            }
+            return data;
         }
 
         /// <summary>
