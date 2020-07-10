@@ -23,11 +23,13 @@ namespace BinalyTest
         /// <param name="e"></param>
         private void Form1_Load(object sender, EventArgs e)
         {
-            modeRadioBtns = new RadioButton[4];
+            modeRadioBtns = new RadioButton[6];
             modeRadioBtns[0] = radioButton1;
             modeRadioBtns[1] = radioButton2;
             modeRadioBtns[2] = radioButton3;
             modeRadioBtns[3] = radioButton4;
+            modeRadioBtns[4] = radioButton5;
+            modeRadioBtns[5] = radioButton6;
         }
 
         /// <summary>

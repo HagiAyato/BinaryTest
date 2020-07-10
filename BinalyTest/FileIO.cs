@@ -47,6 +47,13 @@ namespace BinalyTest
             return false;
         }
 
+        /// <summary>
+        /// ファイル変換のメイン関数
+        /// </summary>
+        /// <param name="readFilePath">読み込みファイルのパス</param>
+        /// <param name="writeFilePath">書き込みファイルオパス</param>
+        /// <param name="mode">モード</param>
+        /// <returns>true:処理成功 false:処理失敗</returns>
         internal static bool FileConvert(string readFilePath, string writeFilePath, int mode)
         {
             // エラーチェック1：モード未選択
@@ -92,6 +99,17 @@ namespace BinalyTest
                     case 3:
                         // テキスト⇒バイナリ
                         FileWriteBin(writeFilePath, HexStrToBin(FileReadStr(readFilePath)));
+                        break;
+                    case 4:
+                        // バイナリ⇒圧縮bin
+                        FileWriteBin(writeFilePath, FileReadBin(readFilePath));
+                        break;
+                    case 5:
+                        // 圧縮bin⇒バイナリ
+                        FileWriteBin(writeFilePath, FileReadBin(readFilePath));
+                        break;
+                    default:
+                        MessageBox.Show("この変換は現在できません。");
                         break;
                 }
             }
