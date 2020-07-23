@@ -102,7 +102,7 @@ namespace BinalyTest
                         break;
                     case 4:
                         // バイナリ⇒圧縮bin
-                        FileWriteBin(writeFilePath, FileReadBin(readFilePath));
+                        FileWriteHaffman(writeFilePath, FileReadBin(readFilePath));
                         break;
                     case 5:
                         // 圧縮bin⇒バイナリ
@@ -245,6 +245,33 @@ namespace BinalyTest
                     using (BinaryWriter writer = new BinaryWriter(fileStream))
                     {
                         writer.Write(data);
+                    }
+                }
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// ハフマン圧縮ファイル書き込み
+        /// </summary>
+        /// <param name="writeFilePath">書き込みむファイルのパス</param>
+        /// <param name="data">書き込むデータ</param>
+        /// <returns>true:処理成功 false:処理失敗</returns>
+        private static bool FileWriteHaffman(string writeFilePath, byte[] data)
+        {
+            try
+            {
+                using (FileStream fileStream = new FileStream(writeFilePath, FileMode.Create))
+                {
+                    using (BinaryWriter writer = new BinaryWriter(fileStream))
+                    {
+                        writer.Write(Haffman.Encode(data));
                     }
                 }
 
