@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace BinalyTest
 {
     /// <summary>
-    /// ハフマン暗号化、複合クラス<br/>
+    /// ハフマン圧縮、解凍クラス<br/>
     /// 参考というか引用元<br/>
     /// https://algoful.com/Archive/Algorithm/HaffmanEncoding
     /// </summary>

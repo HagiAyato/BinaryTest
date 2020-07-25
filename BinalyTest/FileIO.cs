@@ -102,11 +102,11 @@ namespace BinalyTest
                         break;
                     case 4:
                         // バイナリ⇒圧縮bin
-                        FileWriteHaffman(writeFilePath, FileReadBin(readFilePath));
+                        FileWriteBin(writeFilePath, Haffman.Encode(RunLength.Encode(FileReadBin(readFilePath))));
                         break;
                     case 5:
                         // 圧縮bin⇒バイナリ
-                        FileWriteBin(writeFilePath, FileReadHaffman(readFilePath));
+                        FileWriteBin(writeFilePath, Haffman.Decode(FileReadBin(readFilePath)));
                         break;
                     default:
                         MessageBox.Show("この変換は現在できません。");
@@ -246,65 +246,6 @@ namespace BinalyTest
                     using (BinaryWriter writer = new BinaryWriter(fileStream))
                     {
                         writer.Write(data);
-                    }
-                }
-
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message);
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// ハフマン圧縮ファイル読み込み
-        /// </summary>
-        /// <param name="readFilePath">読み込むファイルのパス</param>
-        /// <returns>読み込んだデータ</returns>
-        private static byte[] FileReadHaffman(string readFilePath)
-        {
-            byte[] data = null;
-            try
-            {
-                if (File.Exists(readFilePath))
-                {
-                    using (FileStream fileStream = new FileStream(readFilePath, FileMode.Open))
-                    {
-                        using (BinaryReader reader = new BinaryReader(fileStream))
-                        {
-                            // 読み込み上限は2147483647Byte = 2.147483647GB
-                            int len = (int)fileStream.Length;
-                            data = new byte[len];
-                            reader.Read(data, 0, len);
-                        }
-                    }
-
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message);
-            }
-            return Haffman.Decode(data);
-        }
-
-        /// <summary>
-        /// ハフマン圧縮ファイル書き込み
-        /// </summary>
-        /// <param name="writeFilePath">書き込みむファイルのパス</param>
-        /// <param name="data">書き込むデータ</param>
-        /// <returns>true:処理成功 false:処理失敗</returns>
-        private static bool FileWriteHaffman(string writeFilePath, byte[] data)
-        {
-            try
-            {
-                using (FileStream fileStream = new FileStream(writeFilePath, FileMode.Create))
-                {
-                    using (BinaryWriter writer = new BinaryWriter(fileStream))
-                    {
-                        writer.Write(Haffman.Encode(data));
                     }
                 }
 
