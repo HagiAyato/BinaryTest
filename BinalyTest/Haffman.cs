@@ -153,7 +153,7 @@ namespace BinalyTest
             {
                 // 左側なので0:falseをbitリストに追加
                 codeBits.Add(false);
-                var result = GenerateHaffmanCode(node.Left, target, codeBits);
+                bool[] result = GenerateHaffmanCode(node.Left, target, codeBits);
                 if (result != null) return result;
 
                 // 見つからないならbitリスト追加取り消し
@@ -163,8 +163,8 @@ namespace BinalyTest
             if (node.Right != null)
             {
                 // 右側なので1:trueをbitリストに追加
-                codeBits.Add(false);
-                var result = GenerateHaffmanCode(node.Right, target, codeBits);
+                codeBits.Add(true);
+                bool[] result = GenerateHaffmanCode(node.Right, target, codeBits);
                 if (result != null) return result;
 
                 // 見つからないならbitリスト追加取り消し
@@ -204,7 +204,7 @@ namespace BinalyTest
                 else
                 {
                     // 葉ノードでないならfalse出力
-                    bits.Add(true);
+                    bits.Add(false);
                     // 右左の順番で子ノードを積む
                     if (node.Right != null) stack.Push(node.Right);
                     if (node.Left != null) stack.Push(node.Left);
@@ -234,7 +234,7 @@ namespace BinalyTest
             else
             {
                 // 葉ノードの印の読み飛ばし処理
-                bits = bits.Skip(9);
+                bits = bits.Skip(1);
                 return new HaffmanNode(RegenerateHaffmanTree(ref bits), RegenerateHaffmanTree(ref bits));
             }
         }
@@ -323,10 +323,10 @@ namespace BinalyTest
         /// <returns>解凍後データ</returns>
         internal static byte[] Decode(byte[] data)
         {
-            // 前4byte 圧縮前ファイルサイズ
-            int size = BitConverter.ToInt32(data.Take(4).ToArray(), 0);
             // 圧縮済みデータ
             IEnumerable<bool> bits = data.Skip(4).BytesToBits();
+            // 前4byte 圧縮前ファイルサイズ
+            int size = BitConverter.ToInt32(data.Take(4).ToArray(), 0);
 
             // ハフマン木を再構成
             HaffmanNode root = RegenerateHaffmanTree(ref bits);
@@ -352,10 +352,16 @@ namespace BinalyTest
                 else
                 {
                     // 葉ノードでない
-                    // bitがtrueなら右の子ノードを探索
-                    if (bit) node = node.Right;
-                    // bitがfalseなら左の子ノードを探索
-                    else node = node.Left;
+                    if (bit)
+                    {
+                        // bitがtrueなら右の子ノードを探索
+                        node = node.Right;
+                    }
+                    else
+                    {
+                        // bitがfalseなら左の子ノードを探索
+                        node = node.Left;
+                    }
                 }
             }
             return output.ToArray();

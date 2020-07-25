@@ -106,7 +106,7 @@ namespace BinalyTest
                         break;
                     case 5:
                         // 圧縮bin⇒バイナリ
-                        FileWriteBin(writeFilePath, FileReadBin(readFilePath));
+                        FileWriteBin(writeFilePath, FileReadHaffman(readFilePath));
                         break;
                     default:
                         MessageBox.Show("この変換は現在できません。");
@@ -255,6 +255,38 @@ namespace BinalyTest
                 return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// ハフマン圧縮ファイル読み込み
+        /// </summary>
+        /// <param name="readFilePath">読み込むファイルのパス</param>
+        /// <returns>読み込んだデータ</returns>
+        private static byte[] FileReadHaffman(string readFilePath)
+        {
+            byte[] data = null;
+            try
+            {
+                if (File.Exists(readFilePath))
+                {
+                    using (FileStream fileStream = new FileStream(readFilePath, FileMode.Open))
+                    {
+                        using (BinaryReader reader = new BinaryReader(fileStream))
+                        {
+                            // 読み込み上限は2147483647Byte = 2.147483647GB
+                            int len = (int)fileStream.Length;
+                            data = new byte[len];
+                            reader.Read(data, 0, len);
+                        }
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
+            return Haffman.Decode(data);
         }
 
         /// <summary>
