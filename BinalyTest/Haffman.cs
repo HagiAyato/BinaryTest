@@ -55,12 +55,9 @@ namespace BinalyTest
             /// <summary>
             /// ダミーノードのコンストラクタ
             /// </summary>
-            public HaffmanNode(HaffmanNode root)
+            public HaffmanNode()
             {
-                this.IsLeaf = false;
-                // 左右子ノードはルート
-                this.Left = root;
-                this.Right = root;
+
             }
         }
 
@@ -118,7 +115,8 @@ namespace BinalyTest
             HaffmanNode root = nodeList[0];
 
             // 1種類のデータのみ出現する場合は、ダミーノードを用意
-            if (root.IsLeaf) return new HaffmanNode(root);
+            if (root.IsLeaf) return new HaffmanNode() { IsLeaf = false, Left = root, Right = root };
+            // 左右子ノードはルート
             return root;
         }
 
@@ -138,11 +136,11 @@ namespace BinalyTest
             return dictionaly;
         }
 
-        /// <summary>
         /// ハフマンコードを作成
         /// </summary>
-        /// <param name="node"></param>
-        /// <param name="i"></param>
+        /// <param name="node">ハフマン木ルートノード</param>
+        /// <param name="target">コードを作成したいデータ</param>
+        /// <param name="codeBits">現在のハフマンコード</param>
         /// <returns></returns>
         private static bool[] GenerateHaffmanCode(HaffmanNode node, byte target, List<bool> codeBits = null)
         {
@@ -164,7 +162,7 @@ namespace BinalyTest
             // 右側探索
             if (node.Right != null)
             {
-                // 左側なので0:falseをbitリストに追加
+                // 右側なので1:trueをbitリストに追加
                 codeBits.Add(false);
                 var result = GenerateHaffmanCode(node.Right, target, codeBits);
                 if (result != null) return result;
@@ -177,20 +175,190 @@ namespace BinalyTest
         }
 
         /// <summary>
+        /// ハフマン木自体をビット化
+        /// </summary>
+        /// <param name="root">ハフマン木ルートノード</param>
+        /// <returns></returns>
+        private static bool[] ConvertHaffmanTreeToBits(HaffmanNode root)
+        {
+            List<bool> bits = new List<bool>();
+
+            // スタックを使用して幅優先探索
+            Stack<HaffmanNode> stack = new Stack<HaffmanNode>();
+            stack.Push(root);
+
+            // stackが空になる=ビット化完了まで繰り返し
+            while (0 < stack.Count)
+            {
+                HaffmanNode node = stack.Pop();
+                if (node.IsLeaf)
+                {
+                    // 葉ノードはtrue出力
+                    bits.Add(true);
+                    // 実データを8bit出力
+                    for (int i = 0; i < 8; i++)
+                    {
+                        bits.Add((node.Value >> 7 - i & 1) == 1);
+                    }
+                }
+                else
+                {
+                    // 葉ノードでないならfalse出力
+                    bits.Add(true);
+                    // 右左の順番で子ノードを積む
+                    if (node.Right != null) stack.Push(node.Right);
+                    if (node.Left != null) stack.Push(node.Left);
+                }
+            }
+
+            return bits.ToArray();
+        }
+
+        /// <summary>
+        /// ハフマン木再構成
+        /// </summary>
+        /// <param name="bits"></param>
+        /// <returns></returns>
+        private static HaffmanNode RegenerateHaffmanTree(ref IEnumerable<bool> bits)
+        {
+            // 最初のビットはtrue(=葉ノードの印)か
+            if (bits.First())
+            {
+                // 葉ノードの印を飛ばして実データ取得
+                byte symbol = bits.Skip(1).BitsToByte();
+
+                // 実データ読み飛ばし処理
+                bits = bits.Skip(9);
+                return new HaffmanNode() { Value = symbol, IsLeaf = true };
+            }
+            else
+            {
+                // 葉ノードの印の読み飛ばし処理
+                bits = bits.Skip(9);
+                return new HaffmanNode(RegenerateHaffmanTree(ref bits), RegenerateHaffmanTree(ref bits));
+            }
+        }
+
+        /// <summary>
+        /// ハフマン木データ、符号化したデータを結合
+        /// </summary>
+        /// <param name="treeBits">木コード</param>
+        /// <param name="haffmanCodes">データコード</param>
+        /// <returns>結合後データ</returns>
+        private static IEnumerable<byte> GetAllBytes(bool[] treeBits, IEnumerable<bool[]> haffmanCodes)
+        {
+            int i = 0;
+            // 出力byte
+            byte result = 0;
+            // 木コード
+            foreach (bool bit in treeBits)
+            {
+                // 指定桁数について1を立てる
+                if (bit) result |= (byte)(1 << 7 - i);
+                // i=7⇒1byte分出力完了
+                if (i == 7)
+                {
+                    // 戻り値に1bit追加
+                    yield return result;
+                    i = 0;
+                    result = 0;
+                }
+                else
+                {
+                    i++;
+                }
+            }
+            // データコード
+            foreach (bool[] bits in haffmanCodes)
+            {
+                foreach (bool bit in bits)
+                {
+                    // 指定桁数について1を立てる
+                    if (bit) result |= (byte)(1 << 7 - i);
+                    // i=7⇒1byte分出力完了
+                    if (i == 7)
+                    {
+                        // 戻り値に1bit追加
+                        yield return result;
+                        i = 0;
+                        result = 0;
+                    }
+                    else
+                    {
+                        i++;
+                    }
+                }
+            }
+            //8bitに足りない余りも出力
+            if (i != 0) yield return result;
+        }
+
+        /// <summary>
         /// ハフマン圧縮
         /// </summary>
         /// <param name="data">圧縮前データ</param>
         /// <returns>圧縮後データ</returns>
         internal static byte[] Encode(byte[] data)
         {
+            // 圧縮前データのサイズ確認(32bit=4byteの数値)
+            byte[] size = BitConverter.GetBytes(data.Count());
             // byteの中のバイト別出現回数を集計
             // ハフマン木を作成
             HaffmanNode root = GenerateHaffmanTree(GetFrequency(data));
             // ハフマンコード表を作成
             Dictionary<byte, bool[]> haffmanDict = GetHaffmanCodeTable(root);
             // ハフマン符号化(匿名メソッド使用)
-            var haffmanCode = data.Select(b => { return haffmanDict[b]; });
-            return data;
+            IEnumerable<bool[]> haffmanCodes = data.Select(b => { return haffmanDict[b]; });
+            // ハフマン木をbit化
+            IEnumerable<bool> treeBits = ConvertHaffmanTreeToBits(root);
+            // 書き込む全ビットデータからバイトデータ取得
+            // sizeデータの後ろに取得したバイトデータを連結
+            return size.Concat(GetAllBytes(treeBits.ToArray(), haffmanCodes).ToArray()).ToArray();
+        }
+
+        /// <summary>
+        /// ハフマン解凍
+        /// </summary>
+        /// <param name="data">解凍前データ</param>
+        /// <returns>解凍後データ</returns>
+        internal static byte[] Decode(byte[] data)
+        {
+            // 前4byte 圧縮前ファイルサイズ
+            int size = BitConverter.ToInt32(data.Take(4).ToArray(), 0);
+            // 圧縮済みデータ
+            IEnumerable<bool> bits = data.Skip(4).BytesToBits();
+
+            // ハフマン木を再構成
+            HaffmanNode root = RegenerateHaffmanTree(ref bits);
+            // この時点でbitsデータから前方のハフマン木データが消えている
+            
+            // デコード処理本体
+            // 処理済みバイト数カウンタ
+            int cnt = 0;
+            HaffmanNode node = root;
+            List<byte> output = new List<byte>();
+            foreach(bool bit in bits.ToArray())
+            {
+                if (node.IsLeaf)
+                {
+                    // 葉ノード到達
+                    output.Add(node.Value);
+                    //　先頭に戻る
+                    node = root;
+                    // カウンタが圧縮前ファイルサイズと一致したら処理終了
+                    cnt++;
+                    if (size <= cnt) break;
+                }
+                else
+                {
+                    // 葉ノードでない
+                    // bitがtrueなら右の子ノードを探索
+                    if (bit) node = node.Right;
+                    // bitがfalseなら左の子ノードを探索
+                    else node = node.Left;
+                }
+            }
+            return output.ToArray();
         }
     }
 }
