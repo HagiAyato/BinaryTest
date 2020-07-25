@@ -79,5 +79,15 @@ namespace BinalyTest
             FileIO.FileConvert(textBox1.Text, textBox2.Text, index);
             button3.Enabled = true;
         }
+
+        /// <summary>
+        /// ファイル名コピー処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void label3_Click(object sender, EventArgs e)
+        {
+            textBox2.Text = textBox1.Text;
+        }
     }
 }

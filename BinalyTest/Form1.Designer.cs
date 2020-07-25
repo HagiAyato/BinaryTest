@@ -86,6 +86,7 @@
             this.label3.Size = new System.Drawing.Size(72, 50);
             this.label3.TabIndex = 4;
             this.label3.Text = "↓";
+            this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // radioButton1
             // 
