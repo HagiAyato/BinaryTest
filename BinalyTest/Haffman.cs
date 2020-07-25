@@ -14,6 +14,11 @@ namespace BinalyTest
     public class Haffman
     {
         /// <summary>
+        /// デバッグ用フラグ
+        /// </summary>
+        readonly static bool debugMode = false;
+
+        /// <summary>
         /// ハフマン木ノード用クラス
         /// </summary>
         public class HaffmanNode
@@ -84,7 +89,7 @@ namespace BinalyTest
         private static HaffmanNode GenerateHaffmanTree(int[] freq)
         {
             // ノードリスト
-            var nodeList = new List<HaffmanNode>();
+            List<HaffmanNode> nodeList = new List<HaffmanNode>();
             for (int i = 0; i <= byte.MaxValue; i++)
             {
                 // 頻度0であれば、ノード追加処理はいらないので次の値へ
@@ -147,7 +152,10 @@ namespace BinalyTest
             // 初回呼び出しならbitリスト初期化
             if (codeBits == null) codeBits = new List<bool>();
             // 末端のノード & 現在ノードと一致
-            if (node.IsLeaf && node.Value == target) return codeBits.ToArray();
+            if (node.IsLeaf && (node.Value == target))
+            {
+                return codeBits.ToArray();
+            }
             // 左側探索
             if (node.Left != null)
             {
@@ -305,8 +313,12 @@ namespace BinalyTest
             // byteの中のバイト別出現回数を集計
             // ハフマン木を作成
             HaffmanNode root = GenerateHaffmanTree(GetFrequency(data));
+            // debug
+            if (debugMode) DebugHaffmanTree(root, 0, "");
             // ハフマンコード表を作成
             Dictionary<byte, bool[]> haffmanDict = GetHaffmanCodeTable(root);
+            // debug
+            if (debugMode) DebugHaffmanTable(haffmanDict);
             // ハフマン符号化(匿名メソッド使用)
             IEnumerable<bool[]> haffmanCodes = data.Select(b => { return haffmanDict[b]; });
             // ハフマン木をbit化
@@ -330,14 +342,16 @@ namespace BinalyTest
 
             // ハフマン木を再構成
             HaffmanNode root = RegenerateHaffmanTree(ref bits);
+            // debug
+            if (debugMode) DebugHaffmanTree(root, 0, "");
             // この時点でbitsデータから前方のハフマン木データが消えている
-            
+
             // デコード処理本体
             // 処理済みバイト数カウンタ
             int cnt = 0;
             HaffmanNode node = root;
             List<byte> output = new List<byte>();
-            foreach(bool bit in bits.ToArray())
+            foreach (bool bit in bits.ToArray())
             {
                 if (node.IsLeaf)
                 {
@@ -349,7 +363,8 @@ namespace BinalyTest
                     cnt++;
                     if (size <= cnt) break;
                 }
-                else
+                // ここはelse集約不可
+                if (!node.IsLeaf)
                 {
                     // 葉ノードでない
                     if (bit)
@@ -365,6 +380,61 @@ namespace BinalyTest
                 }
             }
             return output.ToArray();
+        }
+
+        // 動作確認用処理
+        private static void DebugHaffmanTable(Dictionary<byte, bool[]> table)
+        {
+            Console.WriteLine();
+            Console.WriteLine($"DebugHaffmanTable");
+            for (int i = 0; i < 256; i++)
+            {
+                if (table[(byte)i] != null)
+                {
+                    char[] code = table[(byte)i].Select(b => b ? '1' : '0').ToArray();
+                    Console.WriteLine($"{i.ToString("X2")}: {new string(code)}");
+                }
+            }
+        }
+        private static void DebugHaffmanTree(HaffmanNode node, int indent, string bitCode)
+        {
+            if (indent == 0)
+            {
+                Console.WriteLine();
+                Console.WriteLine("DebugHaffmanTree");
+            }
+            List<bool> bits = new List<bool>();
+            bits.AddRange(bits);
+
+            int indent_ = indent > 0 ? indent - 1 : 0;
+            string indentStr = new string(' ', 2 * indent_) + "  --";
+
+            if (node.IsLeaf)
+            {
+                Console.WriteLine(indentStr + $"{node.Value.ToString("X2")}({bitCode})");
+            }
+            else
+            {
+                Console.WriteLine(indentStr + $"");
+                if (node.Left != null)
+                {
+                    DebugHaffmanTree(node.Left, indent + 1, bitCode + "0");
+                }
+                if (node.Right != null)
+                {
+                    DebugHaffmanTree(node.Right, indent + 1, bitCode + "1");
+                }
+            }
+        }
+        public static void DebugString(string str)
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes(str);
+            int[] freq = GetFrequency(bytes);
+            HaffmanNode root = GenerateHaffmanTree(freq);
+            DebugHaffmanTree(root, 0, "");
+            Dictionary<byte, bool[]> table = GetHaffmanCodeTable(root);
+            DebugHaffmanTable(table);
+
         }
     }
 }
