@@ -118,6 +118,7 @@ namespace BinalyTest
                 MessageBox.Show(e.Message);
                 return false;
             }
+            MessageBox.Show("変換完了");
             return true;
         }
 
