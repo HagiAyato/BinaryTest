@@ -102,7 +102,7 @@ namespace BinalyTest
                         break;
                     case 4:
                         // バイナリ⇒圧縮bin
-                        FileWriteBin(writeFilePath, Haffman.Encode(RunLength.Encode(FileReadBin(readFilePath))));
+                        FileWriteBin(writeFilePath, Haffman.Encode(FileReadBin(readFilePath)));
                         break;
                     case 5:
                         // 圧縮bin⇒バイナリ

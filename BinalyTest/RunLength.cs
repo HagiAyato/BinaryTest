@@ -25,14 +25,21 @@ namespace BinalyTest
             List<byte> result = new List<byte>();
             // 残り要出力byte数
             int leave = length;
-            do
+            for (int i = 1; i <= length; i++)
             {
-                // 出力(長さはlnegthと255の小さい方)
-                result.Add(b);
-                result.Add((byte)Math.Min(length, byte.MaxValue));
-                // byte.MaxValue減算
-                leave -= byte.MaxValue;
-            } while (0 < leave);
+                if (i % byte.MaxValue == 0)
+                {
+                    result.Add(b);
+                    result.Add(byte.MaxValue);
+                }
+                else if (i == length)
+                {
+                    // 最終文字数時点で出力
+                    result.Add(b);
+                    result.Add((byte)(length % byte.MaxValue));
+                }
+            }
+
             return result.ToArray();
         }
 
@@ -71,6 +78,28 @@ namespace BinalyTest
                     // 1文字目を保持
                     length = 1;
                     b = bytes[i];
+                }
+            }
+            // 最後の圧縮結果を出力
+            result.AddRange(GetRunLength(b, length));
+            return result.ToArray();
+        }
+
+        public static byte[] Decode(byte[] bytes)
+        {
+            List<byte> result = new List<byte>();
+            byte b = 0;
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                // 偶数番目には文字, 奇数番目にはデータ長
+                if (i % 2 == 0)
+                {
+                    b = bytes[i];
+                }
+                else
+                {
+                    // データの長さ分バイトデータを作成し末尾に追加
+                    result.AddRange(Enumerable.Repeat(b, bytes[i]));
                 }
             }
             return result.ToArray();
