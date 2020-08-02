@@ -85,8 +85,8 @@ namespace BinalyTest
             // 圧縮後配列を作成
             byte[] resultArray = result.ToArray();
             // 圧縮前後で配列長が短い方を出力
-            // 圧縮後が短い⇒先頭にbyte.MaxValue(=255)をつなげて返す。圧縮前が短いか同じ⇒先頭に0をつなげて返す。
-            return resultArray.Length < bytes.Length ? new byte[1] { byte.MaxValue }.Concat(resultArray).ToArray() : new byte[1] { 0 }.Concat(bytes).ToArray();
+            // 圧縮後が短い⇒先頭にbyte.MaxValue(=255(16bit))をつなげて返す。圧縮前が短いか同じ⇒先頭に0(16bit)をつなげて返す。
+            return resultArray.Length < bytes.Length ? BitConverter.GetBytes(byte.MaxValue).Concat(resultArray).ToArray() : BitConverter.GetBytes(byte.MinValue).Concat(bytes).ToArray();
         }
 
         /// <summary>
@@ -96,16 +96,16 @@ namespace BinalyTest
         /// <returns>解凍後データ</returns>
         public static byte[] Decode(byte[] bytes)
         {
-            // 0番目の要素が0なら、1番目からbytes.Length-1個の要素をそのまま戻す。
-            if (bytes[0] == 0) return bytes.ToList().GetRange(1, bytes.Length - 1).ToArray();
-            // 0番目の要素が0でないなら解凍実行
+            // 0-1番目の要素が0なら、1番目からbytes.Length-2個の要素をそのまま戻す。
+            if (BitConverter.ToInt16(bytes.Take(2).ToArray(), 0) == 0) return bytes.ToList().GetRange(2, bytes.Length - 2).ToArray();
+            // 0-1番目の要素が0でないなら解凍実行
             List<byte> result = new List<byte>();
             byte b = 0;
-            // 0番目の要素はすでに見ているので、1番目の要素からループ
-            for (int i = 1; i < bytes.Length; i++)
+            // 0-1番目の要素はすでに見ているので、2番目の要素からループ
+            for (int i = 2; i < bytes.Length; i++)
             {
-                // 奇数番目には文字, 偶数番目にはデータ長
-                if (i % 2 == 1)
+                // 偶数番目には文字, 奇数番目にはデータ長
+                if (i % 2 == 0)
                 {
                     b = bytes[i];
                 }
