@@ -102,11 +102,11 @@ namespace BinalyTest
                         break;
                     case 4:
                         // バイナリ⇒圧縮bin
-                        FileWriteBin(writeFilePath, Haffman.Encode(FileReadBin(readFilePath)));
+                        FileWriteBin(writeFilePath, Haffman.Encode(RunLength.Encode(FileReadBin(readFilePath))));
                         break;
                     case 5:
                         // 圧縮bin⇒バイナリ
-                        FileWriteBin(writeFilePath, Haffman.Decode(FileReadBin(readFilePath)));
+                        FileWriteBin(writeFilePath, RunLength.Decode(Haffman.Decode(FileReadBin(readFilePath))));
                         break;
                     default:
                         MessageBox.Show("この変換は現在できません。");
